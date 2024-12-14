@@ -2,6 +2,7 @@ import { Request,Response } from "express";
 import User from "../models/userModel";
 import sequelize from "../database/connection";
 import bcrypt from 'bcrypt'
+import generateToken from "../services/genereteToken";
 
 class UserController{
     static async register(req:Request,res:Response){
@@ -56,8 +57,10 @@ class UserController{
                     message:"Invalid password"
                 })
             }else{
+              const token=  generateToken(user.id)
                 res.status(200).json({
-                    message:"Logined Successfully"
+                    message:"Logined Successfully",
+                    token
                 })
             }
         }

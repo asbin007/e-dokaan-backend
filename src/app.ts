@@ -1,12 +1,12 @@
-import express from 'express';
-import './database/connection'
-import userRoute from './routes/userRoutes'
+    import express from 'express';
+    import './database/connection'
+    import userRoute from './routes/userRoutes'
 
-const app= express();
-app.use(express.json())
+    const app= express();
+    app.use(express.json())
 
-app.use('/api/auth',userRoute)
+    app.use('/api/auth',userRoute)
 
-export default app;
+    export default app;
 
 

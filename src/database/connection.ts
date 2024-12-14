@@ -6,17 +6,21 @@ const sequelize = new Sequelize(envConfig.databaseUrl as string, {
   models: [__dirname + "/models"],
 });
 
-try {
-  sequelize
-    .authenticate()
-    .then(() => {
-      console.log("authentication is done");
-    })
-    .catch((err) => {
-      console.log("error aayo ", err);
-    });
-} catch (error) {
-  console.log(error);
-}
+// Function to initialize the database connection
+const initializeDatabase = async () => {
+  try {
+    await sequelize.authenticate();
+    console.log("Database authentication successful");
+
+    // Sync the models with the database
+    await sequelize.sync({ force: false });
+    console.log("Database synchronized successfully");
+  } catch (error) {
+    console.error("Database connection error:", error);
+  }
+};
+
+// Call the function to initialize the database
+initializeDatabase();
 
 export default sequelize;
