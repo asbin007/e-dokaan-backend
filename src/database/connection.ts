@@ -6,14 +6,14 @@ const sequelize = new Sequelize(envConfig.databaseUrl as string, {
   models: [__dirname + "/models"],
 });
 
-// Function to initialize the database connection
+// Function to initialize the database connection 
 const initializeDatabase = async () => {
   try {
     await sequelize.authenticate();
     console.log("Database authentication successful");
 
     // Sync the models with the database
-    await sequelize.sync({ force: false });
+    await sequelize.sync({ force: true });
     console.log("Database synchronized successfully");
   } catch (error) {
     console.error("Database connection error:", error);
