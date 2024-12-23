@@ -9,6 +9,7 @@ const router=express.Router();
 
 router.route('/register').post(UserController.register)
 router.route('/login').post(UserController.login)
-
+router.route('/verify-otp').post(UserController.verifyOtp)
 router.route('/forgot-password').post(UserController.handleForgotPassword)
+router.route('/reset-password').post(UserController.resetPassword)
 export default router

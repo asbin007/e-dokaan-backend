@@ -1,26 +1,24 @@
-import { envConfig } from "./../config/config";
-import { Sequelize } from "sequelize-typescript";
+import {Sequelize} from 'sequelize-typescript'
+import { envConfig } from '../config/config'
 
-const sequelize = new Sequelize(envConfig.databaseUrl as string, {
-  dialect: "postgres",
-  models: [__dirname + "/models"],
-});
+const sequelize = new Sequelize(envConfig.databaseUrl as string,{
+    models : [__dirname + '/models']
+})
 
-// Function to initialize the database connection 
-const initializeDatabase = async () => {
-  try {
-    await sequelize.authenticate();
-    console.log("Database authentication successful");
+try {
+    sequelize.authenticate()
+    .then(()=>{
+        console.log("Connected !!! 😀")
+    })
+    .catch(err=>{
+        console.log("ERROR 😝 : ", err)
+    })
+} catch (error) {
+    console.log(error)
+}
 
-    // Sync the models with the database
-    await sequelize.sync({ force: true });
-    console.log("Database synchronized successfully");
-  } catch (error) {
-    console.error("Database connection error:", error);
-  }
-};
+sequelize.sync({force : false,alter:false}).then(()=>{
+    console.log("synced !!")
+})
 
-// Call the function to initialize the database
-initializeDatabase();
-
-export default sequelize;
+export default sequelize

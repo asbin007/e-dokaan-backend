@@ -7,6 +7,7 @@ import sendMail from "../services/sendMail";
 import sendResponse from "../services/sendResponse";
 import findData from "../services/findData";
 import checkOtpExpiration from "../services/checkOtpExpiration";
+import { envConfig } from "../config/config";
 
 class UserController {
   static async register(req: Request, res: Response) {
@@ -15,6 +16,18 @@ class UserController {
     if (!username || !password || !email) {
       res.status(400).json({
         message: "Please provide usernmae,password and email",
+      });
+      return;
+    }
+
+    const [data] = await User.findAll({
+      where: {
+        email: envConfig.adminEmail,
+      },
+    });
+    if (data) {
+       res.status(400).json({
+        message: "please try again later",
       });
       return;
     }
@@ -67,81 +80,84 @@ class UserController {
       }
     }
   }
-  static async handleForgotPassword(req:Request,res:Response){
-    const {email} = req.body 
-    if(!email){
-        res.status(400).json({message : "Please provide email"})
-        return
+  static async handleForgotPassword(req: Request, res: Response) {
+    const { email } = req.body;
+    if (!email) {
+      res.status(400).json({ message: "Please provide email" });
+      return;
     }
-    
+
     const [user] = await User.findAll({
-        where : {
-            email : email
-        }
-    })
-    if(!user){
-         res.status(404).json({
-            email : "Email not registered"
-        })
-        return
+      where: {
+        email: email,
+      },
+    });
+    if (!user) {
+      res.status(404).json({
+        email: "Email not registered",
+      });
+      return;
     }
-   // otp pathaunu paryo aba, generate otp, mail sent
-   const otp = generateOtp()
-   await sendMail({
-       to : email, 
-       subject : "Digital Dokaan Password Change Request", 
-       text : `You just request to reset password. Here is your otp, ${otp}`
-   })
-   user.otp = otp.toString()
-   user.otpGeneratedTime = Date.now().toString()
-   await user.save()
+    // otp pathaunu paryo aba, generate otp, mail sent
+    const otp = generateOtp();
+    await sendMail({
+      to: email,
+      subject: "Digital Dokaan Password Change Request",
+      text: `You just request to reset password. Here is your otp, ${otp}`,
+    });
+    user.otp = otp.toString();
+    user.otpGeneratedTime = Date.now().toString();
+    await user.save();
 
-   res.status(200).json({
-       message : "Password Reset OTP sent!!!!"
-   })
-
-}
-static async verifyOtp(req:Request,res:Response){
-    const {otp,email}=req.body;
-    if(!otp || !email){
-        sendResponse(res,404,"Please provide otp and email ")
-        return
+    res.status(200).json({
+      message: "Password Reset OTP sent!!!!",
+    });
+  }
+  static async verifyOtp(req: Request, res: Response) {
+    const { otp, email } = req.body;
+    if (!otp || !email) {
+      sendResponse(res, 404, "Please provide otp and email ");
+      return;
     }
-    const user=await findData(User,email)
-    if(!user){
-        sendResponse(res,404,"No user with that email")
+    const user = await findData(User, email);
+    if (!user) {
+      sendResponse(res, 404, "No user with that email");
     }
     // otp verification
 
-    const [data]=await User.findAll({
-        where:{
-            otp,email
-        }
-    })
-    if(!data){
-        sendResponse(res,404,'Invalid OTP')
-        return
+    const [data] = await User.findAll({
+      where: {
+        otp,
+        email,
+      },
+    });
+    if (!data) {
+      sendResponse(res, 404, "Invalid OTP");
+      return;
     }
-    const otpGeneratedTime = data.otpGeneratedTime
-        checkOtpExpiration(res,otpGeneratedTime,120000)
-}
-static async resetPassword(req:Request,res:Response){
-    const {newPassword,confirmPassword,email}=req.body;
-    if(!newPassword ||!confirmPassword ||!email){
-        sendResponse(res,400,'Please Provide newPassword,confirm password,email,otp')
-        return
+    const otpGeneratedTime = data.otpGeneratedTime;
+    checkOtpExpiration(res, otpGeneratedTime, 120000);
+  }
+  static async resetPassword(req: Request, res: Response) {
+    const { newPassword, confirmPassword, email } = req.body;
+    if (!newPassword || !confirmPassword || !email) {
+      sendResponse(
+        res,
+        400,
+        "Please Provide newPassword,confirm password,email,otp"
+      );
+      return;
     }
-    if(newPassword !== confirmPassword){
-        sendResponse(res,400,'newpassword and confirm password must be same')
+    if (newPassword !== confirmPassword) {
+      sendResponse(res, 400, "newpassword and confirm password must be same");
     }
-    const user= await findData(User,email)
-    if(!user){
-        sendResponse(res,404,'No email with that user')
+    const user = await findData(User, email);
+    if (!user) {
+      sendResponse(res, 404, "No email with that user");
     }
-    user.password=bcrypt.hashSync(newPassword,12)
-    await user.save()
-    sendResponse(res,200,"Password Reset Successfully !!!")
-}
-
+    user.password = bcrypt.hashSync(newPassword, 12);
+    await user.save();
+    sendResponse(res, 200, "Password Reset Successfully !!!");
+  }
 }
 export default UserController;
