@@ -1,7 +1,7 @@
 import express from "express";
 import "./database/connection";
 import userRoute from "./routes/userRoutes";
-import User from "./database/models/userModel";
+// import User from "./database/models/userModel";
 import categoryRoute from "./routes/categoryRoute";
 
 const app = express();

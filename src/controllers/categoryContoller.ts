@@ -112,4 +112,4 @@ class CategoryController {
   }
 }
 
-export default new CategoryController(); // Fixed typo
+export default new CategoryController; // Fixed typo
