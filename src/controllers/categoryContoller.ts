@@ -15,6 +15,7 @@ class CategoryController {
   ];
 
   async seedCategory(): Promise<void> {
+    
     const datas = await Category.findAll();
     if (datas.length === 0) {
       await Category.bulkCreate(this.categoryData);
@@ -25,6 +26,7 @@ class CategoryController {
   }
 
   async addCategory(req: Request, res: Response): Promise<void> {
+    // @ts-ignore
     const { categoryName } = req.body;
     if (!categoryName) {
       res.status(400).json({

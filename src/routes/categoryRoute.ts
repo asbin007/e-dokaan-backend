@@ -1,12 +1,18 @@
 
 
 
-import express,{Router} from 'express'
-import categoryController from '../controllers/categoryContoller'
-import userMiddleware from '../middleware/userMiddleware'
-const router:Router = express.Router()
+import express ,{Router} from 'express';
+import categoryContoller from '../controllers/categoryContoller';
+import userMiddleware, { Role } from '../middleware/userMiddleware';
 
-router.route("/").get(categoryController.getCategories).post(userMiddleware.isUserLoggedIn, categoryController.addCategory)
-router.route("/:id").patch(categoryController.updateCategory).delete(categoryController.deleteCategories)
 
-export default router 
+
+
+
+
+const router:Router=express.Router()
+
+
+router.route('/').get(categoryContoller.getCategories).post(userMiddleware.isUserLoggedIn,userMiddleware.restrictTo(Role.Admin),categoryContoller.addCategory)
+router.route('/:id').patch(categoryContoller.updateCategory).delete(categoryContoller.deleteCategories)
+export default router;

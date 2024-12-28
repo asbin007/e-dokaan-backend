@@ -15,7 +15,7 @@ class UserController {
     const { username, password, email } = req.body;
     if (!username || !password || !email) {
       res.status(400).json({
-        message: "Please provide usernmae,password and email",
+        message: "Please provide username, password and email",
       });
       return;
     }
@@ -39,7 +39,7 @@ class UserController {
       password: bcrypt.hashSync(password, 10),
     });
     res.status(201).json({
-      message: "User registered succesfully",
+      message: "User registered successfully",
     });
   }
 

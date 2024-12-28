@@ -1,8 +1,7 @@
 import adminSeeder from "./src/adminSeeder";
 import app from "./src/app";
 import { envConfig } from "./src/config/config";
-import categoryContoller from "./src/controllers/categoryContoller";
-
+import categoryContoller from "../server/src/controllers/categoryContoller";
 function startServer() {
   const port = envConfig.port || 4000;
   app.listen(port, () => {
