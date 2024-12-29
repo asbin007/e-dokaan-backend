@@ -1,4 +1,4 @@
-import {Sequelize} from 'sequelize-typescript'
+import {ForeignKey, Sequelize} from 'sequelize-typescript'
 import { envConfig } from '../config/config'
 import Product from './models/productModel'
 import Category from './models/categoryModel'
@@ -24,8 +24,8 @@ sequelize.sync({force : false,alter:false}).then(()=>{
 })
 
 // relationship
-Product.belongsTo(Category)
-Category.hasOne(Product)
+Product.belongsTo(Category,{foreignKey:'categoryId'})
+Category.hasOne(Product,{foreignKey:'categoryId'})
 
 
 export default sequelize

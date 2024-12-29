@@ -2,11 +2,11 @@ import { NextFunction, Request, Response } from "express";
 import Product from "../database/models/productModel";
 import Category from "../database/models/categoryModel";
 
-interface ProductRequest extends Request {
-  file?: {
-    filename: string;
-  };
-}
+// interface ProductRequest extends Request {
+//   file?: {
+//     filename: string;
+//   };
+// }
 
 class ProductController {
   async createProduct(
@@ -20,8 +20,11 @@ class ProductController {
       productPrice,
       productTotalStock,
       discount,
-      categoryId,
+      categoryId
+
     } = req.body;
+    // console.log(req.file)
+
     //@ts-ignore
     const filename = req.file
       ? req.file.filename
@@ -45,7 +48,7 @@ class ProductController {
       productPrice,
       productTotalStock,
       discount: discount || 0,
-      categoryId,
+      categoryId:categoryId,
       productImageUrl: filename,
     });
     res.status(200).json({
@@ -57,9 +60,14 @@ class ProductController {
       include: [
         {
           model: Category,
+          attributes:['id','categoryName']
         },
       ],
     });
+    res.status(200).json({
+      message:"Products fetched successfully",
+      data:datas
+    })
   }
   async getSingleProduct(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
@@ -70,6 +78,8 @@ class ProductController {
       include: [
         {
           model: Category,
+          attributes : ['id','categoryName']
+
         },
       ],
     });
