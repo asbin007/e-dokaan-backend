@@ -2,6 +2,7 @@ import express, { Router } from "express";
 import productController from "../controllers/productController";
 import { multer, storage } from "../middleware/multerMiddleware";
 import userMiddleware, { Role } from "../middleware/userMiddleware";
+import errorHandler from "../services/errrorHandler";
 const upload = multer({ storage: storage });
 const router = express.Router();
 
@@ -12,7 +13,7 @@ router
     userMiddleware.isUserLoggedIn,
     userMiddleware.accessTo(Role.Admin),
     upload.single("productImage"),
-    productController.createProduct
+    errorHandler(productController.createProduct)
   )
   .get(productController.getAllProducts);
 
@@ -21,13 +22,13 @@ router
   .post(
     userMiddleware.isUserLoggedIn,
     userMiddleware.accessTo(Role.Admin),
-    productController.deleteProduct
+    errorHandler(productController.deleteProduct)
   )
-  .get(productController.getAllProducts)
+  .get(errorHandler(productController.getSingleProduct))
   .delete(
     userMiddleware.isUserLoggedIn,
     userMiddleware.accessTo(Role.Admin),
-    productController.deleteProduct
+    errorHandler(productController.deleteProduct)
   );
 
 export default router;
