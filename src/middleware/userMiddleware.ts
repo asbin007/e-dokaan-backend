@@ -5,77 +5,68 @@ import User from "../database/models/userModel";
 
 import UserController from "../controllers/userContoller";
 
-export enum Role {
-  Admin = "admin",
-  Customer = "customer",
+export enum Role{
+  Admin = 'admin', 
+  Customer = "customer"
 }
 
-interface IExtendedRequest extends Request {
-  user?: {
-    username: string;
-    email: string;
-    role: string;
-    password: string;
-    id: string;
-  };
+interface IExtendedRequest extends Request{
+  user? : {
+      username : string, 
+      email : string, 
+      role : string, 
+      password : string, 
+      id : string
+
+  }
 }
-
-class UserMiddleware {
-  async isUserLoggedIn(
-    req: IExtendedRequest,
-    res: Response,
-    next: NextFunction
-  ): Promise<void> {
-    // Receive token
-    const token = req.headers.authorization;
-
-    if (!token) {
-      res.status(400).json({
-        message: "Token must be provided",
-      });
-      return;
-    }
-
-    // Validate token
-    jwt.verify(
-      token,
-      envConfig.jwtSecreteKey as string,
-      async (err, result: any) => {
-        if (err) {
+class UserMiddleware{
+  async isUserLoggedIn(req:IExtendedRequest,res:Response,next:NextFunction):Promise<void>{
+      // receive token 
+     const token =  req.headers.authorization // ASBIN
+     if(!token){
+      res.status(403).json({
+          message : "Token must be provided"
+      })
+      return
+     }
+      // validate token 
+     jwt.verify(token,envConfig.jwtSecreteKey as string, async (err,result:any)=>{
+      if(err){
           res.status(403).json({
-            message: "Invalid Token",
-          });
-          return; // Ensure to return here
-        }
-
-        const userData = await User.findByPk(result.userId);
-        if (!userData) {
-          res.status(404).json({
-            message: "No user with that userID",
-          });
-          return; // Ensure to return here
-        }
-
-        // Attach user data to request
-        req.user = userData;
-        next(); // Proceed to the next middleware or route handler
+              message : "Invalid token !!!"
+          })
+      }else{
+       //{userId : 123123123}
+          const userData = await User.findByPk(result.userId) // {email:"",pass:"",role:""}
+          if(!userData){
+              res.status(404).json({
+                  message : "No user with that userId"
+              })
+              return
+          }
+          req.user = userData 
+          next()
       }
-    );
+     })
+
   }
-
-  accessTo(...roles: Role[]) {
-    return (req: IExtendedRequest, res: Response, next: NextFunction) => {
-      let userRole = req.user?.role as Role;
-      console.log(userRole, "Role");
-      if (!roles.includes(userRole)) {
-        res.status(400).json({
-          message: "You dont have permission ",
-        });
-        return;
+  accessTo(...roles:Role[]){ 
+      return (req:IExtendedRequest,res:Response,next:NextFunction)=>{
+          let userRole = req.user?.role as Role
+         if(!roles.includes(userRole)){
+              res.status(403).json({
+                   message : "You dont have permission haiii!!"
+              })
+              return
+          }
+          next()
       }
-      next();
-    };
   }
 }
 
-export default new UserMiddleware();
+
+
+
+
+export default new UserMiddleware
