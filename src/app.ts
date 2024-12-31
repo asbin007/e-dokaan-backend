@@ -4,12 +4,14 @@ import userRoute from "./routes/userRoutes";
 // import User from "./database/models/userModel";
 import categoryRoute from "./routes/categoryRoute";
 import productRoute from "./routes/productRoute"
+import orderRoute from "./routes/orderRoute"
 const app = express();
 app.use(express.json());
 
 app.use("/api/auth", userRoute);
 app.use('/api/category',categoryRoute)
 app.use("/api/product",productRoute)
+app.use("/api/order",orderRoute)
 
 // const schedule = require('node-schedule');
 
