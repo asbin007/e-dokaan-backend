@@ -10,5 +10,6 @@ export const envConfig={
     e_password:process.env.E_PASSWORD,
     adminEmail:process.env.ADMIN_EMAIL,
     adminPassword:process.env.ADMIN_PASSWORD,
-    adminUsername:process.env.ADMIN_USERNAME
+    adminUsername:process.env.ADMIN_USERNAME,
+    live_secrete_key:process.env.LIVE_SECRETE_KEY,
 }

@@ -1,9 +1,8 @@
 import express, { Router } from 'express';
-import { Role } from './../middleware/userMiddleware';
 
 import orderController from "../controllers/orderController"
 import userMiddleware from "../middleware/userMiddleware"
-import errorHandler from '../services/errrorHandler';
+import errorHandler from '../services/errorHandler';
 const router:Router=express.Router()
 
 

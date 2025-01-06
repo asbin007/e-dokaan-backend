@@ -2,9 +2,9 @@ import express, { Router } from "express";
 import productController from "../controllers/productController";
 import { multer, storage } from "../middleware/multerMiddleware";
 import userMiddleware, { Role } from "../middleware/userMiddleware";
-import errorHandler from "../services/errrorHandler";
+import errorHandler from "../services/errorHandler";
 const upload = multer({ storage: storage });
-const router = express.Router();
+const router:Router = express.Router();
 
 // router.route('/').post(productController.createProduct)
 router

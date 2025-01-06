@@ -3,7 +3,7 @@ import { Table, Column, Model, DataType } from "sequelize-typescript";
 
 @Table({
   tableName: "orders",
-  modelName: "order",
+  modelName: "Order",
   timestamps: true,
 })
 class Order extends Model {
@@ -20,7 +20,7 @@ class Order extends Model {
     validate: {
       len: {
         args: [10, 10],
-        msg: "Phone number must be 10 digits nor less nor more",
+        msg: "Phone number must be 10 digits, neither less nor more.",
       },
     },
   })
@@ -30,13 +30,14 @@ class Order extends Model {
     type: DataType.STRING,
     allowNull: false,
   })
-  declare shipphingAddress: string;
+  declare shippingAddress: string; // Fixed typo
 
   @Column({
     type: DataType.FLOAT,
     allowNull: false,
   })
   declare totalAmount: number;
+
   @Column({
     type: DataType.ENUM(
       OrderStatus.Cancelled,
@@ -45,9 +46,10 @@ class Order extends Model {
       OrderStatus.Pending,
       OrderStatus.Preparation
     ),
+    allowNull: false, // Ensure OrderStatus is always set
     defaultValue: OrderStatus.Pending,
   })
-  declare OrderStatus: string;
+  declare orderStatus: OrderStatus; // Changed to use the enum type
 }
 
-export default  Order;
+export default Order;
