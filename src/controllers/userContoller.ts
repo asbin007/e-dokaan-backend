@@ -25,7 +25,7 @@ class UserController {
         email: envConfig.adminEmail,
       },
     });
-    if (data) {
+    if (!data) {
        res.status(400).json({
         message: "please try again later",
       });

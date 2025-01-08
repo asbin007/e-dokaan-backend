@@ -11,11 +11,11 @@ class Payment extends Model {
   @Column({
     primaryKey: true,
     type: DataType.UUID,
-    defaultValue: DataType.UUID,
+    defaultValue: DataType.UUIDV4,
   })
   declare id: string;
 
-  @Column({                                                                                                                                                                                                     
+  @Column({
     type: DataType.ENUM(
       PaymentMethod.COD,
       PaymentMethod.Esewa,
@@ -26,10 +26,14 @@ class Payment extends Model {
   declare paymentMethod: string;
 
   @Column({
-    type:DataType.ENUM(PaymentStatus.Paid,PaymentStatus.Unpaid),
-    defaultValue:PaymentStatus.Unpaid
+    type: DataType.ENUM(PaymentStatus.Paid, PaymentStatus.Unpaid),
+    defaultValue: PaymentStatus.Unpaid,
   })
-  declare paymentStatus:string
+  declare paymentStatus: string;
+  @Column({
+    type: DataType.STRING,
+  })
+  declare pidx: string;
 }
 
-export default Payment
+export default Payment;
