@@ -1,3 +1,4 @@
+import { AllowNull } from 'sequelize-typescript';
 import { Sequelize} from 'sequelize-typescript'
 import { envConfig } from '../config/config'
 import Product from './models/productModel'
@@ -6,7 +7,7 @@ import User from './models/userModel'
 import Order from './models/orderModel'
 import Payment from './models/paymentModel'
 import OrderDetails from './models/orderDetails'
-
+import Cart from './models/cartModel';
 const sequelize = new Sequelize(envConfig.databaseUrl as string,{
     models : [__dirname + '/models']
 })
@@ -51,6 +52,23 @@ OrderDetails.belongsTo(Order,{foreignKey:'orderId'})
 
 Product.hasMany(OrderDetails,{foreignKey:'ProductId'})
 OrderDetails.belongsTo(Product,{foreignKey:'ProductId'})
+
+
+// cart x user
+Cart.belongsTo(User,{foreignKey:'userId'})
+User.hasOne(Cart,{foreignKey:'userId'})
+
+
+// cart x product
+Cart.belongsTo(Product,{foreignKey:'productId'})
+Product.hasMany(Cart,{foreignKey:'productId'})
+
+
+
+
+
+
+
 
 
 export default sequelize

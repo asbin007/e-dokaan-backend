@@ -19,12 +19,19 @@ interface OrderRequest extends Request {
 class OrderController {
   static async createOrder(req: OrderRequest, res: Response): Promise<void> {
     const userId = req.user?.id;
-    const { phoneNumber, shippingAddress, totalAmount, paymentMethod } = req.body;
+    const { phoneNumber, shippingAddress, totalAmount, paymentMethod } =
+      req.body;
     const products: IProduct[] = req.body.products;
 
-    if (!phoneNumber || !shippingAddress || !totalAmount || products.length === 0) {
+    if (
+      !phoneNumber ||
+      !shippingAddress ||
+      !totalAmount ||
+      products.length === 0
+    ) {
       res.status(400).json({
-        message: "Please provide phoneNumber, shippingAddress, totalAmount, and products",
+        message:
+          "Please provide phoneNumber, shippingAddress, totalAmount, and products",
       });
       return;
     }
@@ -38,13 +45,15 @@ class OrderController {
     });
 
     // Create order details
-    await Promise.all(products.map(async (product) => {
-      await OrderDetails.create({
-        quantity: product.productQty,
-        productId: product.productId,
-        orderId: orderData.id,
-      });
-    }));
+    await Promise.all(
+      products.map(async (product) => {
+        await OrderDetails.create({
+          quantity: product.productQty,
+          productId: product.productId,
+          orderId: orderData.id,
+        });
+      })
+    );
 
     // Create payment
     const paymentData = await Payment.create({
@@ -82,9 +91,8 @@ class OrderController {
       res.status(200).json({
         message: "Order created successfully",
         url: khaltiResponse.payment_url,
-        pidx: khaltiResponse.pidx
+        pidx: khaltiResponse.pidx,
       });
-
     } else if (paymentMethod === PaymentMethod.Esewa) {
       // Esewa payment logic
       // Implement your logic here
@@ -98,7 +106,10 @@ class OrderController {
     }
   }
 
-  static async verifyTransaction(req: OrderRequest, res: Response): Promise<void> {
+  static async verifyTransaction(
+    req: OrderRequest,
+    res: Response
+  ): Promise<void> {
     const { pidx } = req.body;
 
     if (!pidx) {
@@ -108,16 +119,18 @@ class OrderController {
       return;
     }
 
-    const response = await axios.get(
+    const response = await axios.post(
       "https://dev.khalti.com/api/v2/epayment/lookup/",
       {
-        params: { pidx: pidx }, // Correctly pass params
+        pidx: pidx,
+      }, // Correctly pass params
+      {
         headers: {
           Authorization: "Key 5d818e0244bd414f99ad73e584d04e11",
         },
       }
     );
-    console.log(response.data);
+    console.log(response);
 
     const data = response.data;
     if (data.status === "Completed") {

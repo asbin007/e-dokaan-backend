@@ -2,6 +2,8 @@ import adminSeeder from "./src/adminSeeder";
 import app from "./src/app";
 import { envConfig } from "./src/config/config";
 import categoryContoller from "../server/src/controllers/categoryContoller";
+import { Server } from "socket.io";
+
 function startServer() {
   const port = envConfig.port || 4000;
   app.listen(port, () => {
@@ -10,5 +12,6 @@ function startServer() {
     console.log(`Sever has been started at ${port}`);
     adminSeeder();
   });
+  const io=new Server(app);
 }
 startServer();
