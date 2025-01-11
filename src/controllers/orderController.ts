@@ -82,7 +82,7 @@ class OrderController {
       res.status(200).json({
         message: "Order created successfully",
         url: khaltiResponse.payment_url,
-        pidx: khaltiResponse.pidx,
+        pidx: khaltiResponse.pidx
       });
 
     } else if (paymentMethod === PaymentMethod.Esewa) {
@@ -117,7 +117,7 @@ class OrderController {
         },
       }
     );
-    console.log(response);
+    console.log(response.data);
 
     const data = response.data;
     if (data.status === "Completed") {
