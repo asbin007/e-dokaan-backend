@@ -33,13 +33,14 @@ class UserController {
     }
 
     // data=--> user table mah insert garne
-    await User.create({
+    const userData=await User.create({
       username,
       email,
       password: bcrypt.hashSync(password, 10),
     });
     res.status(201).json({
       message: "User registered successfully",
+      
     });
   }
 
@@ -97,7 +98,7 @@ class UserController {
         email: "Email not registered",
       });
       return;
-    }
+  }
     // otp pathaunu paryo aba, generate otp, mail sent
     const otp = generateOtp();
     await sendMail({
