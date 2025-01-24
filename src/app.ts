@@ -27,5 +27,6 @@ app.use("/api/cart",cartRoute)
 // const job = schedule.scheduleJob('*/5 * * * *',  async function(){
 //     await User.findAll()
 // });
-
+// permission given to uploads
+app.use(express.static('./src/uploads'))
 export default app;
