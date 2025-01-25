@@ -39,8 +39,13 @@ class CartController {
         quantity,
       });
     }
+    const cartData =await Cart.findAll({
+      where:{
+        userId
+      }
+    })
 
-    res.status(201).json({ message: "Product added to cart" });
+    res.status(201).json({ message: "Product added to cart" ,data:cartData});
   }
 
   async getCart(req: AuthRequest, res: Response) { // Change Request to AuthRequest
