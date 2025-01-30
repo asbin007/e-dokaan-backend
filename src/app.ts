@@ -28,5 +28,5 @@ app.use("/api/cart",cartRoute)
 //     await User.findAll()
 // });
 // permission given to uploads
-app.use(express.static('./src/uploads'))
+app.use(express.static("./src/uploads"))
 export default app;

@@ -23,7 +23,7 @@ class ProductController {
       categoryId
 
     } = req.body;
-    // console.log(req.file)
+    console.log(req.file)
 
     //@ts-ignore
     const filename = req.file
@@ -49,7 +49,7 @@ class ProductController {
       productTotalStock,
       discount: discount || 0,
       categoryId:categoryId,
-      productImageUrl: filename,
+      productImgUrl: filename,
     });
     res.status(200).json({
       message: "Product created successfully",

@@ -42,6 +42,10 @@ class CartController {
     const cartData =await Cart.findAll({
       where:{
         userId
+      },
+      include:{
+        model: Product
+
       }
     })
 
@@ -57,7 +61,7 @@ class CartController {
       include: [
         {
           model: Product,
-          attributes: ["id", "productName", "productPrice", "productImageUrl"],
+          attributes: ["id", "productName", "productPrice", "productImgUrl"],
         },
       ],
     });
