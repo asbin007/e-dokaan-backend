@@ -44,7 +44,7 @@ class ProductController {
     }
     await Product.create({
       productName,
-      productDescription,
+      productDescription, 
       productPrice,
       productTotalStock,
       discount: discount || 0,
@@ -71,7 +71,7 @@ class ProductController {
   }
   async getSingleProduct(req: Request, res: Response): Promise<void> {
     const { id } = req.params;
-    const datas = await Product.findAll({
+    const [datas] = await Product.findAll({
       where: {
         id: id,
       },
