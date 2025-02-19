@@ -49,7 +49,7 @@ class CartController {
       }
     })
 
-    res.status(201).json({ message: "Product added to cart" ,data:cartData});
+    res.status(200).json({ message: "Product added to cart" ,data:cartData});
   }
 
   async getCart(req: AuthRequest, res: Response) { // Change Request to AuthRequest

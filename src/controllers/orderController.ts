@@ -4,6 +4,7 @@ import OrderDetails from "../database/models/orderDetails";
 import { PaymentMethod, PaymentStatus } from "../globals/types";
 import Payment from "../database/models/paymentModel";
 import axios from "axios";
+import Cart from "../database/models/cartModel";
 
 interface IProduct {
   productId: string;
@@ -19,19 +20,35 @@ interface OrderRequest extends Request {
 class OrderController {
   static async createOrder(req: OrderRequest, res: Response): Promise<void> {
     const userId = req.user?.id;
-    const { phoneNumber, shippingAddress, totalAmount, paymentMethod } =
-      req.body;
+    const {
+      phoneNumber,
+      AddressLine,
+      totalAmount,
+      paymentMethod,
+      firstName,
+      lastName,
+      email,
+      city,
+      zipCode,
+      state,
+    } = req.body;
     const products: IProduct[] = req.body.products;
 
     if (
       !phoneNumber ||
-      !shippingAddress ||
+      !AddressLine ||
       !totalAmount ||
-      products.length === 0
+      products.length === 0 ||
+      !firstName ||
+      !lastName ||
+      !email ||
+      !city ||
+      !zipCode ||
+      !state
     ) {
       res.status(400).json({
         message:
-          "Please provide phoneNumber, shippingAddress, totalAmount, and products",
+          "Please provide firstName, lastName ,phoneNumber, AddressLine, totalAmount, zipCode and state information for your application",
       });
       return;
     }
@@ -39,19 +56,33 @@ class OrderController {
     // Create order
     const orderData = await Order.create({
       phoneNumber,
-      shippingAddress,
+      AddressLine,
       totalAmount,
       userId,
+      firstName,
+      lastName,
+      email,
+      city,
+      zipCode,
+      state,
     });
 
+
     // Create order details
+    let data;
     await Promise.all(
-      products.map(async (product) => {
+    data=  products.map(async (product) => {
         await OrderDetails.create({
           quantity: product.productQty,
           productId: product.productId,
           orderId: orderData.id,
         });
+        await Cart.destroy({
+          where: {
+            userId,
+            productId: product.productId,
+          },
+        })
       })
     );
 
@@ -92,6 +123,7 @@ class OrderController {
         message: "Order created successfully",
         url: khaltiResponse.payment_url,
         pidx: khaltiResponse.pidx,
+        data
       });
     } else if (paymentMethod === PaymentMethod.Esewa) {
       // Esewa payment logic

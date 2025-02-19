@@ -28,10 +28,16 @@ class Order extends Model {
 
   @Column({
     type: DataType.STRING,
-    allowNull: false,
   })
-  declare shippingAddress: string; // Fixed typo
-
+  declare AddressLine: string; // Fixed typo
+  @Column({
+    type: DataType.STRING,
+  })
+  declare City: string;
+  @Column({
+    type: DataType.STRING,
+  })
+  declare zipCode : string;
   @Column({
     type: DataType.FLOAT,
     allowNull: false,
@@ -49,7 +55,25 @@ class Order extends Model {
     allowNull: false, // Ensure OrderStatus is always set
     defaultValue: OrderStatus.Pending,
   })
-  declare orderStatus: OrderStatus; // Changed to use the enum type
+  declare orderStatus: OrderStatus; 
+
+  @Column({
+    type:DataType.STRING,
+    allowNull: true,
+  })
+  declare firstName: string;
+  
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  declare lastName: string;
+  
+  @Column({
+    type: DataType.STRING,
+    allowNull: true,
+  })
+  declare email: string;
 }
 
 export default Order;
