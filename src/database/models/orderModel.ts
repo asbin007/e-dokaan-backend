@@ -43,6 +43,10 @@ class Order extends Model {
     allowNull: false,
   })
   declare totalAmount: number;
+  @Column({
+    type:DataType.STRING
+  })
+  declare state: string;
 
   @Column({
     type: DataType.ENUM(

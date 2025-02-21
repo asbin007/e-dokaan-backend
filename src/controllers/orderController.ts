@@ -1,10 +1,12 @@
 import { Request, Response } from "express";
 import Order from "../database/models/orderModel";
 import OrderDetails from "../database/models/orderDetails";
-import { PaymentMethod, PaymentStatus } from "../globals/types";
+import { OrderStatus, PaymentMethod, PaymentStatus } from "../globals/types";
 import Payment from "../database/models/paymentModel";
 import axios from "axios";
 import Cart from "../database/models/cartModel";
+import Product from "../database/models/productModel";
+import Category from "../database/models/categoryModel";
 
 interface IProduct {
   productId: string;
@@ -28,11 +30,12 @@ class OrderController {
       firstName,
       lastName,
       email,
-      city,
+      City,
       zipCode,
       state,
     } = req.body;
     const products: IProduct[] = req.body.products;
+    console.log(req.body);
 
     if (
       !phoneNumber ||
@@ -42,7 +45,7 @@ class OrderController {
       !firstName ||
       !lastName ||
       !email ||
-      !city ||
+      !City ||
       !zipCode ||
       !state
     ) {
@@ -54,6 +57,12 @@ class OrderController {
     }
 
     // Create order
+    let data;
+    // Create payment
+    const paymentData = await Payment.create({
+      
+      paymentMethod: paymentMethod
+    });
     const orderData = await Order.create({
       phoneNumber,
       AddressLine,
@@ -62,35 +71,31 @@ class OrderController {
       firstName,
       lastName,
       email,
-      city,
+      City,
       zipCode,
       state,
+      paymentId: paymentData.id,
     });
 
+   
+    // for orderDetails
+    products.forEach(async function (product) {
+      data = await OrderDetails.create({
+        quantity: product.productQty,
+        productId: product.productId,
+        orderId: orderData.id,
+      });
 
-    // Create order details
-    let data;
-    await Promise.all(
-    data=  products.map(async (product) => {
-        await OrderDetails.create({
-          quantity: product.productQty,
+      await Cart.destroy({
+        where: {
           productId: product.productId,
-          orderId: orderData.id,
-        });
-        await Cart.destroy({
-          where: {
-            userId,
-            productId: product.productId,
-          },
-        })
-      })
-    );
-
-    // Create payment
-    const paymentData = await Payment.create({
-      orderId: orderData.id,
-      paymentMethod: paymentMethod,
+          userId: userId,
+        },
+      });
     });
+
+    
+
 
     if (paymentMethod === PaymentMethod.Khalti) {
       // Khalti payment logic
@@ -123,7 +128,8 @@ class OrderController {
         message: "Order created successfully",
         url: khaltiResponse.payment_url,
         pidx: khaltiResponse.pidx,
-        data
+
+        data,
       });
     } else if (paymentMethod === PaymentMethod.Esewa) {
       // Esewa payment logic
@@ -132,8 +138,9 @@ class OrderController {
         message: "Order created successfully with Esewa payment method",
       });
     } else {
-      res.status(400).json({
-        message: "Invalid payment method",
+      res.status(200).json({
+        message: "successfully created  order with cash on delivery",
+        data,
       });
     }
   }
@@ -178,6 +185,106 @@ class OrderController {
         message: "Payment not completed",
       });
     }
+  }
+
+  static async fetchMyOrder(req: OrderRequest, res: Response): Promise<void> {
+    const userId = req.user?.id;
+    const orders = await Order.findAll({
+      where: {
+        userId,
+      },
+      attributes:['id','totalAmount','orderStatus']
+      ,
+      include:{
+        model: Payment,
+        attributes:['paymentMethod','paymentStatus']
+      }
+    });
+    if (orders.length > 0) {
+      res.status(200).json({
+        message: "successfully fetched orders",
+        data: orders,
+      });
+    } else {
+      res.status(404).json({
+        message: "No orders found",
+        data: [],
+      });
+    }
+  }
+
+  static async fetchOrderDetails(
+    req: OrderRequest,
+    res: Response
+  ): Promise<void> {
+    const orderId = req.params.id;
+    const userId = req.user?.id 
+
+    const orders = await OrderDetails.findAll({
+      where : {
+        orderId, 
+
+      }, 
+      include : [{
+        model : Order , 
+        include : [
+          {
+            model : Payment, 
+            attributes : ["paymentMethod","paymentStatus"]
+          }
+        ],
+        attributes : ["orderStatus","AddressLine","City","state","totalAmount","phoneNumber","firstName","lastName"]
+      },{
+        model : Product, 
+        include : [{
+          model : Category
+        }], 
+        attributes : ["productImgUrl","productName","productPrice"]
+      }]
+    })
+
+    if (orders.length > 0) {
+      res.status(200).json({
+        message: "Successfully fetched order details",
+        data: orders,
+      });
+    } else {
+      res.status(404).json({
+        message: "No order details found",
+        data: [],
+      });
+    }
+  }
+  static async cancelMyOrder(req:OrderRequest,res:Response):Promise<void>{
+    const userId = req.user?.id 
+    const orderId = req.params.id 
+    const [order] = await Order.findAll({
+      where : {
+        userId : userId, 
+        id : orderId 
+      }
+    })
+    if(!order){
+      res.status(400).json({
+        message : "No order with that Id"
+      })
+      return 
+    }
+    // check order status 
+    if(order.orderStatus === OrderStatus.Ontheway || order.orderStatus === OrderStatus.Preparation){
+      res.status(403).json({
+        message : "You cannot cancelled order, it is on the way or preparation mode"
+      })
+      return
+    }
+    await Order.update({orderStatus : OrderStatus.Cancelled},{
+      where : {
+        id : orderId
+      }
+    })
+    res.status(200).json({
+      message : "Order cancelled successfully"
+    })
   }
 }
 

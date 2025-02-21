@@ -25,7 +25,7 @@ try {
   console.log(error);
 }
 
-sequelize.sync({ force: false, alter: false }).then(() => {
+sequelize.sync({ force: false, alter: false}).then(() => {
   console.log("synced !!");
 });
 
@@ -41,16 +41,16 @@ Order.belongsTo(User, { foreignKey: "userId" });
 
 // payment x order
 
-Order.hasOne(Payment, { foreignKey: "orderId" });
-Payment.belongsTo(Order, { foreignKey: "orderId" });
+Payment.hasOne(Order, { foreignKey: "paymentId" });
+Order.belongsTo(Payment, { foreignKey: "paymentId" });
 
 Order.hasOne(OrderDetails, { foreignKey: "orderId" });
 OrderDetails.belongsTo(Order, { foreignKey: "orderId" });
 
 // order detills x product id
 
-Product.hasMany(OrderDetails, { foreignKey: "ProductId" });
-OrderDetails.belongsTo(Product, { foreignKey: "ProductId" });
+Product.hasMany(OrderDetails, { foreignKey: "productId" });
+OrderDetails.belongsTo(Product, { foreignKey: "productId" });
 
 // cart x user
 Cart.belongsTo(User, { foreignKey: "userId" });
@@ -59,5 +59,6 @@ User.hasOne(Cart, { foreignKey: "userId" });
 // cart x product
 Cart.belongsTo(Product, { foreignKey: "productId" });
 Product.hasMany(Cart, { foreignKey: "productId" });
+
 
 export default sequelize;
