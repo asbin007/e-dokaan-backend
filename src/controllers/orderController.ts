@@ -19,6 +19,10 @@ interface OrderRequest extends Request {
   };
 }
 
+class OrderWithPayment extends Order{
+  declare paymentId:string | null
+}
+
 class OrderController {
   static async createOrder(req: OrderRequest, res: Response): Promise<void> {
     const userId = req.user?.id;
@@ -60,8 +64,7 @@ class OrderController {
     let data;
     // Create payment
     const paymentData = await Payment.create({
-      
-      paymentMethod: paymentMethod
+      paymentMethod: paymentMethod,
     });
     const orderData = await Order.create({
       phoneNumber,
@@ -77,7 +80,6 @@ class OrderController {
       paymentId: paymentData.id,
     });
 
-   
     // for orderDetails
     products.forEach(async function (product) {
       data = await OrderDetails.create({
@@ -93,9 +95,6 @@ class OrderController {
         },
       });
     });
-
-    
-
 
     if (paymentMethod === PaymentMethod.Khalti) {
       // Khalti payment logic
@@ -193,12 +192,11 @@ class OrderController {
       where: {
         userId,
       },
-      attributes:['id','totalAmount','orderStatus']
-      ,
-      include:{
+      attributes: ["id", "totalAmount", "orderStatus"],
+      include: {
         model: Payment,
-        attributes:['paymentMethod','paymentStatus']
-      }
+        attributes: ["paymentMethod", "paymentStatus"],
+      },
     });
     if (orders.length > 0) {
       res.status(200).json({
@@ -218,30 +216,43 @@ class OrderController {
     res: Response
   ): Promise<void> {
     const orderId = req.params.id;
-    const userId = req.user?.id 
+    const userId = req.user?.id;
 
     const orders = await OrderDetails.findAll({
-      where : {
-        orderId, 
-
-      }, 
-      include : [{
-        model : Order , 
-        include : [
-          {
-            model : Payment, 
-            attributes : ["paymentMethod","paymentStatus"]
-          }
-        ],
-        attributes : ["orderStatus","AddressLine","City","state","totalAmount","phoneNumber","firstName","lastName"]
-      },{
-        model : Product, 
-        include : [{
-          model : Category
-        }], 
-        attributes : ["productImgUrl","productName","productPrice"]
-      }]
-    })
+      where: {
+        orderId,
+      },
+      include: [
+        {
+          model: Order,
+          include: [
+            {
+              model: Payment,
+              attributes: ["paymentMethod", "paymentStatus"],
+            },
+          ],
+          attributes: [
+            "orderStatus",
+            "AddressLine",
+            "City",
+            "state",
+            "totalAmount",
+            "phoneNumber",
+            "firstName",
+            "lastName",
+          ],
+        },
+        {
+          model: Product,
+          include: [
+            {
+              model: Category,
+            },
+          ],
+          attributes: ["productImgUrl", "productName", "productPrice"],
+        },
+      ],
+    });
 
     if (orders.length > 0) {
       res.status(200).json({
@@ -255,36 +266,100 @@ class OrderController {
       });
     }
   }
-  static async cancelMyOrder(req:OrderRequest,res:Response):Promise<void>{
-    const userId = req.user?.id 
-    const orderId = req.params.id 
+  static async cancelMyOrder(req: OrderRequest, res: Response): Promise<void> {
+    const userId = req.user?.id;
+    const orderId = req.params.id;
     const [order] = await Order.findAll({
-      where : {
-        userId : userId, 
-        id : orderId 
+      where: {
+        userId: userId,
+        id: orderId,
+      },
+    });
+    if (!order) {
+      res.status(400).json({
+        message: "No order with that Id",
+      });
+      return;
+    }
+    // check order status
+    if (
+      order.orderStatus === OrderStatus.Ontheway ||
+      order.orderStatus === OrderStatus.Preparation
+    ) {
+      res.status(403).json({
+        message:
+          "You cannot cancelled order, it is on the way or preparation mode",
+      });
+      return;
+    }
+    await Order.update(
+      { orderStatus: OrderStatus.Cancelled },
+      {
+        where: {
+          id: orderId,
+        },
+      }
+    );
+    res.status(200).json({
+      message: "Order cancelled successfully",
+    });
+  }
+
+  static async updateOrderStatus(
+    req: OrderRequest,
+    res: Response
+  ): Promise<void> {
+    const orderId = req.params.id;
+    const { orderStatus } = req.params;
+    if (!orderId || !orderStatus) {
+      res.status(400).json({
+        message: "Please provide orderId and orderStatus",
+      });
+      return;
+    }
+    await Order.update(
+      {
+        orderStatus: orderStatus,
+      },
+      {
+        where: {
+          id: orderId,
+        },
+      }
+    );
+    res.status(200).json({
+      message: "Order status updated successfully",
+    });
+  }
+  static async deleteOrder(req:OrderRequest,res:Response):Promise<void>{
+    const orderId=req.params.id;
+    const order:OrderWithPayment= await Order.findByPk(orderId) as OrderWithPayment;
+    const paymentId=order?.paymentId;
+    if(!order){
+      res.status(404).json({
+        message:"No order found with that id"
+      });
+      return;
+    }
+    await OrderDetails.destroy({
+      where:{
+        orderId:orderId
       }
     })
-    if(!order){
-      res.status(400).json({
-        message : "No order with that Id"
-      })
-      return 
-    }
-    // check order status 
-    if(order.orderStatus === OrderStatus.Ontheway || order.orderStatus === OrderStatus.Preparation){
-      res.status(403).json({
-        message : "You cannot cancelled order, it is on the way or preparation mode"
-      })
-      return
-    }
-    await Order.update({orderStatus : OrderStatus.Cancelled},{
-      where : {
-        id : orderId
+    await Payment.destroy({
+      where:{
+        id:paymentId
+      }
+    })
+    await Order.destroy({
+      where:{
+        id:orderId
       }
     })
     res.status(200).json({
-      message : "Order cancelled successfully"
+      message:"Order deleted successfully"
     })
+     
   }
 }
 
