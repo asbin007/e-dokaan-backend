@@ -160,5 +160,19 @@ class UserController {
     await user.save();
     sendResponse(res, 200, "Password Reset Successfully !!!");
   }
+
+static async fetchUsers(req:Request,res:Response):Promise<void>{
+
+  const  users=User.findAll({
+    attributes:['id','username','role','email']
+  });
+  res.status(200).json({
+    
+    data:users,
+    message:"Users fetched successfully"
+  })
+
+}
+
 }
 export default UserController;
